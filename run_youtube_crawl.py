@@ -67,7 +67,7 @@ def service_is_ready(base_url):
         return False
 
 
-def start_tracking_service(base_url, asset_dir, data_file=None):
+def start_tracking_service(base_url, asset_dir, data_file=None, seed_file=None):
     parsed = urlparse(base_url)
     host = parsed.hostname or "127.0.0.1"
     port = parsed.port or 8020
@@ -92,6 +92,8 @@ def start_tracking_service(base_url, asset_dir, data_file=None):
         "-p",
         str(port),
     ]
+    if seed_file:
+        args.extend(["--seed", seed_file])
 
     print(f"[TRACK] starting local service: {base_url}")
     proc = subprocess.Popen([str(a) for a in args], cwd=str(ROOT), env=os.environ.copy())
@@ -168,7 +170,7 @@ def main():
             tracking_proc = start_tracking_service(
                 tracking_url,
                 asset_dir,
-                cfg.get("download_config", {}).get("download_registry_file"),
+                seed_file=cfg.get("download_config", {}).get("download_registry_file"),
             )
 
         status = cfg.get("status", {})

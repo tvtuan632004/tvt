@@ -1,5 +1,5 @@
 {
-    "save_dir": "D:/VSF/avsr-crawl-main/outputs/youtube_crawl",
+    "save_dir": "D:/VSF/tvt/outputs/youtube_crawl",
     "domain": "MePhimVietTHVL",
     "keywords": [
         "https://www.youtube.com/@MePhimVietTHVL/videos"
@@ -22,15 +22,15 @@
         "verbose": true,
         "num_worker": 2,
         "force_download": false,
-        "max_items": 10,
+        "max_items": 1,
         "download_video": true,
         "write_subtitles": true,
         "write_automatic_subtitles": true,
         "cookies_from_browser": null,
-        "cookie_file": "D:/VSF/avsr-crawl-main/config/youtube_cookies.txt",
+        "cookie_file": null,
         "allow_remote_components": true,
         "max_video_height": 720,
-        "download_registry_file": "D:/VSF/avsr-crawl-main/config/downloaded_videos_registry.json",
+        "download_registry_file": "D:/VSF/tvt/config/downloaded_videos_registry.json",
         "check_downloaded_video_url": "http://127.0.0.1:8020"
     }
 }

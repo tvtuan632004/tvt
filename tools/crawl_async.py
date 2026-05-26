@@ -111,7 +111,6 @@ async def process_channel(channel_info):
     channel_name = channel_info.get('name', channel_id)
 
     if not channel_id or channel_id in mark_channels: return
-    mark_channels[channel_id] = 1
 
     print(f"\nProcessing Channel: {channel_name} ({channel_url})")
     try:
@@ -123,6 +122,7 @@ async def process_channel(channel_info):
             entries = [e for e in channel_data['entries'] if e and e.get('id')]
             for entry in tqdm.tqdm(entries, desc=f"Videos in {channel_name[:15]}"):
                 await dump_info(entry, fallback_channel_info=channel_info)
+            mark_channels[channel_id] = 1
     except Exception as e:
         print(f"Error processing channel {channel_url}: {e}")
 

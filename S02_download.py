@@ -42,6 +42,63 @@ def add_video(video_id, check_url):
     except:
         pass
 
+def reserve_video(video_id, check_url, metadata=None):
+    if not check_url:
+        return True
+    try:
+        res = requests.post(
+            f"{check_url}/reserve_video",
+            json={"video_id": video_id, "metadata": metadata or {}},
+            timeout=5,
+        )
+        if res.status_code != 200:
+            return True
+        data = res.json()
+        return bool(data.get("reserved", False))
+    except Exception as e:
+        print(f"[WARN] Cannot reserve {video_id}: {e}. Continuing without shared reserve.")
+        return True
+
+def complete_video(video_id, check_url, metadata=None):
+    if not check_url:
+        return
+    try:
+        requests.post(
+            f"{check_url}/complete_video",
+            json={"video_id": video_id, "metadata": metadata or {}},
+            timeout=5,
+        )
+    except Exception as e:
+        print(f"[WARN] Cannot complete registry record for {video_id}: {e}")
+
+def fail_video(video_id, check_url, error):
+    if not check_url:
+        return
+    try:
+        requests.post(
+            f"{check_url}/fail_video",
+            json={"video_id": video_id, "error": str(error)},
+            timeout=5,
+        )
+    except Exception:
+        pass
+
+def load_download_registry_ids(registry_file):
+    if not registry_file:
+        return set()
+    try:
+        with open(registry_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return set(str(k) for k in data.keys())
+        if isinstance(data, list):
+            return set(str(v) for v in data)
+    except FileNotFoundError:
+        print(f"[WARN] Download registry not found: {registry_file}")
+    except Exception as e:
+        print(f"[WARN] Cannot read download registry {registry_file}: {e}")
+    return set()
+
 def _strip_subtitle_text(raw_text):
     lines = []
     for line in raw_text.splitlines():
@@ -287,18 +344,22 @@ def crawl_video(json_file, config):
     outdir = os.path.join(config["Dataset_dir"], video_id)
     
     try:
+        with open(json_file, "r", encoding="utf-8") as f:
+            old_data = json.load(f)
+
+        if not reserve_video(video_id, config["check_downloaded_video_url"], old_data):
+            print(f"[SKIP Shared Registry] {video_id}")
+            return
+
         if not validate_video_info(json_file, config):
+            fail_video(video_id, config["check_downloaded_video_url"], "validation failed")
             return
 
         success, info, segment_count = download_video_and_sub(video_id, outdir, config)
         if not success:
             print(f"---> Failed -> Skip: {video_id}")
+            fail_video(video_id, config["check_downloaded_video_url"], "download failed")
             return
-            
-        add_video(video_id, config["check_downloaded_video_url"])
-
-        with open(json_file, "r", encoding="utf-8") as f:
-            old_data = json.load(f)
             
         languages_list = []
         if segment_count > 0 and info.get('requested_subtitles'):
@@ -327,6 +388,8 @@ def crawl_video(json_file, config):
         with open(dst_json_path, "w", encoding="utf-8") as f:
             json.dump(new_metadata, f, ensure_ascii=False, indent=4)
 
+        complete_video(video_id, config["check_downloaded_video_url"], new_metadata)
+
         elapsed = time.time() - start
         with counter.get_lock():
             counter.value += 1
@@ -341,6 +404,7 @@ def crawl_video(json_file, config):
             print(f"[SUCCESS No Sub] {video_id} | {elapsed:.2f}s | {done}/{TOTAL_VIDEOS} | ETA {eta:.1f}s")
 
     except Exception as e:
+        fail_video(video_id, config.get("check_downloaded_video_url"), e)
         print(f"[ERROR] {video_id}: {e}")
         with open("log_error.txt", "a+", encoding="utf-8") as fw:
             fw.write(f"\n{video_id} - {str(e)}\n")
@@ -385,6 +449,9 @@ if __name__ == "__main__":
         "cookie_file": download_cfg.get("cookie_file"),
         "allow_remote_components": download_cfg.get("allow_remote_components", True)
     }
+    registry_ids = load_download_registry_ids(download_cfg.get("download_registry_file"))
+    if registry_ids:
+        print(f"Download registry loaded: {len(registry_ids)} IDs")
 
     _ensure_dir(config["Dataset_dir"])
  
@@ -400,6 +467,8 @@ if __name__ == "__main__":
         local_downloaded = set(os.listdir(config["Dataset_dir"]))
         for j_file in all_json_files:
             vid_id = os.path.splitext(os.path.basename(j_file))[0]
+            if vid_id in registry_ids:
+                continue
             if not is_downloaded_ok(vid_id, config["Dataset_dir"]) and not check_video(vid_id, config["check_downloaded_video_url"]):
                 download_json_files.append(j_file)
     else:
