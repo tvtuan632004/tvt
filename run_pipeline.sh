@@ -4,7 +4,7 @@ set -euo pipefail
 CFG=${1:-config/test.json}
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-python - <<'PY'
+python - "$CFG" <<'PY'
 import json, os, sys
 cfg = sys.argv[1] if len(sys.argv) > 1 else "config/test.json"
 with open(cfg, "r", encoding="utf-8") as f:
@@ -29,7 +29,7 @@ with open(kw_path, "w", encoding="utf-8") as f:
 print(kw_path)
 PY
 
-DOMAIN=$(python - <<'PY'
+DOMAIN=$(python - "$CFG" <<'PY'
 import json, sys
 cfg = sys.argv[1] if len(sys.argv) > 1 else "config/test.json"
 with open(cfg, "r", encoding="utf-8") as f:
@@ -38,7 +38,7 @@ print(data["domain"])
 PY
 )
 
-SAVE_DIR=$(python - <<'PY'
+SAVE_DIR=$(python - "$CFG" <<'PY'
 import json, sys
 cfg = sys.argv[1] if len(sys.argv) > 1 else "config/test.json"
 with open(cfg, "r", encoding="utf-8") as f:
@@ -47,7 +47,7 @@ print(data["save_dir"])
 PY
 )
 
-VIDEO_LIMIT=$(python - <<'PY'
+VIDEO_LIMIT=$(python - "$CFG" <<'PY'
 import json, sys
 cfg = sys.argv[1] if len(sys.argv) > 1 else "config/test.json"
 with open(cfg, "r", encoding="utf-8") as f:
@@ -56,7 +56,7 @@ print(data["search_config"]["video_limit"])
 PY
 )
 
-CHANNEL_LIMIT=$(python - <<'PY'
+CHANNEL_LIMIT=$(python - "$CFG" <<'PY'
 import json, sys
 cfg = sys.argv[1] if len(sys.argv) > 1 else "config/test.json"
 with open(cfg, "r", encoding="utf-8") as f:
@@ -65,7 +65,7 @@ print(data["search_config"]["channel_limit"])
 PY
 )
 
-KEYWORDS_FILE=$(python - <<'PY'
+KEYWORDS_FILE=$(python - "$CFG" <<'PY'
 import json, os, sys
 cfg = sys.argv[1] if len(sys.argv) > 1 else "config/test.json"
 with open(cfg, "r", encoding="utf-8") as f:

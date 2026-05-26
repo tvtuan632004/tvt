@@ -1,6 +1,7 @@
-# Flask Video Download Tracking Service
+# Shared Video Download Registry Service
 
-This is a simple Flask web service for tracking downloaded videos. It allows you to check if a video exists in the download list and add information about newly downloaded videos.
+This Flask service prevents multiple crawl workers from downloading the same YouTube video ID.
+It stores records for uploaded, reserved, downloaded, and failed videos in a JSON file.
 
 ## Getting Started
 
@@ -8,26 +9,27 @@ This is a simple Flask web service for tracking downloaded videos. It allows you
 
 Make sure you have Python and pip installed on your machine.
 
-```bash
-pip install Flask
+```powershell
+python -m pip install -r requirements-download.txt
 ```
 
-### Installation
+### Team Usage
 
-1. Clone the repository.
+Run this on one shared machine that everyone can reach on the LAN:
 
-```bash
-git clone git@bitbucket.org:vinbdi-slp/tts-crawl.git
-cd tts-crawl/tools/check_download_video
+```powershell
+.\run_download_registry.ps1 -Data outputs/shared_download_registry.json -Seed config/downloaded_videos_registry.json -Port 8020
 ```
 
-2. Run the Flask application.
+Then every crawler should point `check_downloaded_video_url` to that machine:
 
-```bash
-python check_download_video_api.py -d video_data.json -p 8020
+```json
+"check_downloaded_video_url": "http://<shared-machine-ip>:8020"
 ```
 
-The service will be available at `http://localhost:8020`.
+The seed file is only read to preload known Hugging Face uploads. New reservations/downloads are written to `outputs/shared_download_registry.json`, not back into the seed file.
+
+For a local single-machine run, `run_youtube_crawl.py` starts this service automatically on `127.0.0.1`.
 
 ## API Endpoints
 
@@ -48,7 +50,58 @@ The service will be available at `http://localhost:8020`.
     "exists": true
   }
   ```
-### 2. Add New Video
+
+### 2. Reserve Video Before Download
+
+- **Endpoint:** `/reserve_video`
+- **Method:** POST
+- **Body:**
+  ```json
+  {
+    "video_id": "your_video_id",
+    "metadata": {}
+  }
+  ```
+- **Response:**
+  ```json
+  {
+    "reserved": true,
+    "exists": false
+  }
+  ```
+
+If another worker already reserved or downloaded the ID, `reserved` is `false` and the crawler should skip it.
+
+### 3. Complete Video After Download
+
+- **Endpoint:** `/complete_video`
+- **Method:** POST
+- **Body:**
+  ```json
+  {
+    "video_id": "your_video_id",
+    "metadata": {
+      "title": "...",
+      "link": "..."
+    }
+  }
+  ```
+
+### 4. Mark Failed Video
+
+- **Endpoint:** `/fail_video`
+- **Method:** POST
+- **Body:**
+  ```json
+  {
+    "video_id": "your_video_id",
+    "error": "download failed"
+  }
+  ```
+
+Reserved-but-failed IDs are released so another worker can retry later.
+
+### 5. Add New Video Legacy Endpoint
 
 - **Endpoint:** `/add_video`
 - **Method:** GET
@@ -61,7 +114,7 @@ The service will be available at `http://localhost:8020`.
   curl http://localhost:8020/add_video?video_id=your_video_id
   ```
 
-### 3. List Downloaded Videos
+### 6. List Downloaded Videos
 
 - **Endpoint:** `/list_downloaded_videos`
 - **Method:** GET
@@ -73,12 +126,14 @@ The service will be available at `http://localhost:8020`.
 - **Response:**
   ```json
   {
-    "video_id1": "Ip address of download machine",
-    "video_id2": "Ip address of download machine",
-    "video_id3": "Ip address of download machine"
+    "video_id1": {
+      "status": "downloaded",
+      "metadata": {}
+    }
   }
   ```
-### 4. Get Downloaded Video Info
+
+### 7. Get Downloaded Video Info
 
 - **Endpoint:** `/get_info`
 - **Method:** GET
@@ -90,16 +145,12 @@ The service will be available at `http://localhost:8020`.
 - **Response:**
   ```json
   {
-    "your_video_id": "Ip address of download machine",
+    "your_video_id": {
+      "status": "downloaded",
+      "metadata": {}
+    }
   }
   ```
 ## Data Storage
 
-The service uses a JSON file (`downloaded_videos.json`) to store information about downloaded videos. Make sure to handle file permissions and backup the file as needed.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
-
-Feel free to customize the content based on your specific project details.
+The service uses a JSON file to store records. Put that JSON file somewhere durable and shared/backed up if the team depends on it.
