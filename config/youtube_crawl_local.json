@@ -30,6 +30,7 @@
         "cookie_file": "D:/VSF/avsr-crawl-main/config/youtube_cookies.txt",
         "allow_remote_components": true,
         "max_video_height": 720,
+        "download_registry_file": "D:/VSF/avsr-crawl-main/config/downloaded_videos_registry.json",
         "check_downloaded_video_url": "http://127.0.0.1:8020"
     }
 }

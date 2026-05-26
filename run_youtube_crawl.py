@@ -67,7 +67,7 @@ def service_is_ready(base_url):
         return False
 
 
-def start_tracking_service(base_url, asset_dir):
+def start_tracking_service(base_url, asset_dir, data_file=None):
     parsed = urlparse(base_url)
     host = parsed.hostname or "127.0.0.1"
     port = parsed.port or 8020
@@ -80,7 +80,10 @@ def start_tracking_service(base_url, asset_dir):
         print(f"[TRACK] already running: {base_url}")
         return None
 
-    data_file = asset_dir / "downloaded_videos.json"
+    data_file = Path(data_file) if data_file else asset_dir / "downloaded_videos.json"
+    if not data_file.is_absolute():
+        data_file = ROOT / data_file
+    data_file.parent.mkdir(parents=True, exist_ok=True)
     args = [
         sys.executable,
         ROOT / "tools" / "check_download_video" / "check_download_video_api.py",
@@ -162,7 +165,11 @@ def main():
     try:
         tracking_url = cfg.get("download_config", {}).get("check_downloaded_video_url")
         if tracking_url and not args.search_only:
-            tracking_proc = start_tracking_service(tracking_url, asset_dir)
+            tracking_proc = start_tracking_service(
+                tracking_url,
+                asset_dir,
+                cfg.get("download_config", {}).get("download_registry_file"),
+            )
 
         status = cfg.get("status", {})
         if not args.download_only and status.get("search", True):
