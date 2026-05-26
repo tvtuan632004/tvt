@@ -1,0 +1,26 @@
+{
+    "save_dir": "/data1/loinh/tts-crawl/",
+    "domain": "Podcast",
+    "keywords": ["Vietcetera", "Vietsuccess","VietNam Innovators Digest"],
+    "status": {
+        "search": true,
+        "download": false,
+        "segmentation": false,
+        "transcription": false,
+        "quality_measurement": false,
+        "data_selection": false,
+        "analysis": false
+    },
+    "search_config": {
+        "video_limit": 2500,
+        "channel_limit": 100
+    },
+    "download_config": {
+        "min_segment": 1,
+        "lang": ["vi"],
+        "verbose": true,
+        "num_worker": 2,
+        "force_download": false,
+        "check_downloaded_video_url": "http://127.0.0.1:8020"
+    }
+}

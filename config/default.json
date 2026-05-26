@@ -1,0 +1,79 @@
+{
+    "save_dir": "/userdata/luongtd11/tts-crawl/outputs/test",
+    "domain": "discovry",
+    "keywords": [],
+    "links": [
+        "-5YBjnYJYfM"
+    ],
+    "status": {
+        "search": true,
+        "download": false,
+        "segmentation": false,
+        "transcription": false,
+        "quality_measurement": false,
+        "data_selection": false,
+        "analysis": false
+    },
+    "search_config": {
+        "video_limit": 20000,
+        "channel_limit": 10
+    },
+    "download_config": {
+        "min_segment": 1,
+        "lang": "vietnamese",
+        "verbose": true,
+        "num_worker": 2,
+        "force_download": true,
+        "check_downloaded_video_url": "http://127.0.0.1:8020",
+        "proxy_url": "http://10.124.68.86:9999"
+    },
+    "segmentation_config": {
+        "segmentation_type": "inaSpeechSegmenter",
+        "vad_engine": "smn",
+        "detect_gender": true,
+        "batch_size": 16,
+        "filter_short_second": 1000,
+        "remove_raw_audio": false,
+        "num_worker": 1
+    },
+    "transcription_config": {
+        "min_syllable": 0,
+        "remove_short_sentence": false,
+        "wav_type": "wavs",
+        "endpoint": 0.8,
+        "num_worker": 32,
+        "asr_server_url": "localhost:8001",
+        "asr_live_check_url": "http://localhost:8003",
+        "init_asr_server": true,
+        "process_type": "map_async"
+    },
+    "quality_measurement_config": {
+        "personalized_MOS": false,
+        "num_worker": 8
+    },
+    "enhancement_config": {
+        "min_snr": 5,
+        "max_snr": 15,
+        "remove_origin": true,
+        "remove_low_quality": true,
+        "device": "cuda"
+    },
+    "speaker_processing_config": {
+        "device": "cuda",
+        "self_similarity_threshold": 0.6,
+        "utt_similarity_threshold": 1.2,
+        "similar_speaker_threshold": 0.85,
+        "forced_rerun": true
+    },
+    "data_selection_config": {
+        "min_snr": 5,
+        "min_ovrl": 3.0,
+        "min_p808_mos": 3.5,
+        "speech_label": [
+            "speech",
+            "male",
+            "female"
+        ],
+        "remove_unused_segment": true
+    }
+}

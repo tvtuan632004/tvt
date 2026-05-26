@@ -1,0 +1,9 @@
+{
+    "repo_id": "tuantv6304/Tuantv",
+    "repo_type": "dataset",
+    "local_path": "D:/VSF/avsr-crawl-main/outputs/youtube_crawl/MMSDataMePhimVietTHVL",
+    "path_in_repo": "MMSDataMePhimVietTHVL",
+    "upload_mode": "by_video",
+    "commit_message": "Upload YouTube crawl dataset",
+    "delete_after_upload": true
+}

@@ -1,0 +1,5 @@
+config/youtube_cookies.txt
+outputs/
+log_error.txt
+__pycache__/
+*.pyc

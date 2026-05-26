@@ -1,0 +1,35 @@
+{
+    "save_dir": "D:/VSF/avsr-crawl-main/outputs/youtube_crawl",
+    "domain": "MePhimVietTHVL",
+    "keywords": [
+        "https://www.youtube.com/@MePhimVietTHVL/videos"
+    ],
+    "status": {
+        "search": true,
+        "download": true
+    },
+    "search_config": {
+        "video_limit": 0,
+        "channel_limit": 20,
+        "lang": "vi",
+        "region": "VN"
+    },
+    "download_config": {
+        "min_segment": 1,
+        "lang": [
+            "vi"
+        ],
+        "verbose": true,
+        "num_worker": 2,
+        "force_download": false,
+        "max_items": 10,
+        "download_video": true,
+        "write_subtitles": true,
+        "write_automatic_subtitles": true,
+        "cookies_from_browser": null,
+        "cookie_file": "D:/VSF/avsr-crawl-main/config/youtube_cookies.txt",
+        "allow_remote_components": true,
+        "max_video_height": 720,
+        "check_downloaded_video_url": "http://127.0.0.1:8020"
+    }
+}
